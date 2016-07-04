@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import sys, math
+import sys, math, os
 from flask import Flask, request, jsonify, send_file
 from osgeo import gdal, osr, ogr
 
@@ -10,6 +10,8 @@ sm_a = 6378137.0
 sm_b = 6356752.314
 sm_EccSquared = 6.69437999013e-03
 UTMScaleFactor = 0.9996
+
+image_dir = os.path.abspath('../satellite-images-cutter/satellite_images')
 
 app = Flask(__name__)
 
@@ -30,7 +32,7 @@ def crop_by_bounding_box(file_name):
 	#
 	driver = gdal.GetDriverByName('GTiff')
 	driver.Register()
-	dataset = gdal.Open('/home/sant/test/satellite_images/{}.tif'.format(file_name))
+	dataset = gdal.Open('{}/{}.tif'.format(image_dir,file_name))
 	if dataset is None:
 		print 'Could not open {}.tif'.format(file_name)
 		sys.exit(1)
@@ -75,7 +77,7 @@ def crop_by_bounding_box(file_name):
 	#
 	# Create gtif file
 	#
-	output_file = '/home/sant/test/{}_cutted_by_bounding_box.tif'.format(file_name)
+	output_file = '{}/{}_cutted_by_bounding_box.tif'.format(image_dir, file_name)
 	driver = gdal.GetDriverByName("GTiff")
 	dst_ds = driver.Create(output_file, new_cols, new_rows, 3, gdal.GDT_Byte)
 	#
@@ -152,7 +154,7 @@ def crop_by_geojson(file_name):
 	#
 	driver = gdal.GetDriverByName('GTiff')
 	driver.Register()
-	dataset = gdal.Open('/home/sant/test/satellite_images/{}.tif'.format(file_name))
+	dataset = gdal.Open('{}/{}.tif'.format(image_dir, file_name))
 	if dataset is None:
 		print 'Could not open ' + file_name + '.tif'
 		sys.exit(1)
@@ -209,7 +211,7 @@ def crop_by_geojson(file_name):
 	feat.SetGeometryDirectly( ogr.Geometry(wkt = wkt_geom.ExportToWkt()) )
 	lyr.CreateFeature(feat)
 	# Create output file
-	output_file = '/home/sant/test/{}_cutted_by_geojson.tif'.format(file_name)
+	output_file = '{}/{}_cutted_by_geojson.tif'.format(image_dir, file_name)
 	driver = gdal.GetDriverByName('GTiff')
 	outds = driver.Create(output_file, new_cols, new_rows, bands, gdal.GDT_Byte)
 	#
