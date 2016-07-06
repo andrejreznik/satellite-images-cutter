@@ -2,7 +2,11 @@
 
 import sys, math, os
 from flask import Flask, request, jsonify, send_file
-from osgeo import gdal, osr, ogr
+
+try:
+    from osgeo import ogr, osr, gdal
+except:
+    sys.exit('ERROR: cannot find GDAL/OGR modules')
 
 
 # Ellipsoid model constants (actual values here are for WGS84)
@@ -11,7 +15,8 @@ sm_b = 6356752.314
 sm_EccSquared = 6.69437999013e-03
 UTMScaleFactor = 0.9996
 
-image_dir = os.path.abspath('../satellite-images-cutter/satellite_images')
+base_dir = os.path.dirname(os.path.abspath(__file__))
+image_dir = base_dir + '/satellite_images/'
 
 app = Flask(__name__)
 
@@ -103,6 +108,7 @@ def crop_by_bounding_box(file_name):
 	dataset = None
 	dst_ds = None
 	return send_file(output_file,  as_attachment=True)
+
 
 #curl -H "Content-Type=application/json" --data (input json) -X POST http://127.0.0.1:5000/date/20160518/crop_by_geojson
 @app.route('/date/<file_name>/crop_by_geojson', methods=['GET', 'POST']) 
@@ -232,6 +238,7 @@ def crop_by_geojson(file_name):
 	dataset = None
 	outds = None
 	return send_file(output_file,  as_attachment=True)
+
 
 def explode(coords):
 	"""Explode a GeoJSON geometry's coordinates object and yield coordinate tuples.
