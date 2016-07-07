@@ -1,8 +1,11 @@
 #! /usr/bin/python
 
-import sys, math, os, numpy, json
+import sys, math, os, numpy
 from flask import Flask, request, jsonify, send_file
-from osgeo import gdal, osr, ogr
+try:
+	from osgeo import ogr, osr, gdal
+except:
+	sys.exit('ERROR: cannot find GDAL/OGR modules')
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -101,9 +104,9 @@ def crop_by_bounding_box(file_name):
 	return send_file(output_file,  as_attachment=True)
 
 #curl -H "Content-Type=application/json" --data """ GeoJSON """ -X POST http://127.0.0.1:5000/date/20160518/crop_by_geojson
-@app.route('/date/<file_name>/crop_by_geojson', methods=['GET', 'POST']) 
+@app.route('/date/<file_name>/crop_by_geojson', methods=['GET', 'POST'])
 def crop_by_geojson(file_name):
-	#geojson = request.get_json(force=True)
+	#geojson = jsonify(request.get_json(force=True))
 	geojson = {
   		"type": "Feature",
   		"properties": {
